@@ -317,7 +317,7 @@ var canvasWindowedScaleMode = 1 /*STRETCH*/;
 // High DPI setting configures whether to match the canvas size 1:1 with
 // the physical pixels on the screen.
 // For background, see https://www.khronos.org/webgl/wiki/HandlingHighDPI
-var canvasWindowedUseHighDpi = true;
+var canvasWindowedUseHighDpi = false;
 
 // Stores the initial size of the canvas in physical pixel units.
 // If canvasWindowedScaleMode == 3 (FIXED), this size defines the fixed resolution
