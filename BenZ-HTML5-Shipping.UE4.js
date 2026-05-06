@@ -312,7 +312,7 @@ function detectWebGL() {
 // Canvas scaling mode should be set to one of: 1=STRETCH, 2=ASPECT, or 3=FIXED.
 // This dictates how the canvas size changes when the browser window is resized
 // by dragging from the corner.
-var canvasWindowedScaleMode = 2 /*ASPECT*/;
+var canvasWindowedScaleMode = 1 /*STRETCH*/;
 
 // High DPI setting configures whether to match the canvas size 1:1 with
 // the physical pixels on the screen.
@@ -349,20 +349,9 @@ function resizeCanvas(aboutToEnterFullscreen) {
 		return;
 	}
 
-	// Compute the unconstrained size for fullscreen canvas
+	// Compute the unconstrained size for fullscreen canvas - always use full window size
 	var cssWidth = window.innerWidth;
 	var cssHeight = window.innerHeight;
-
-	var mainArea = document.getElementById('mainarea');
-	var buttonArea = document.getElementById('buttonarea');
-	
-	// Fallback to original behavior if mainarea exists
-	if (mainArea) {
-		var mainAreaRect = mainArea.getBoundingClientRect();
-		var buttonAreaRect = buttonArea ? buttonArea.getBoundingClientRect() : { height: 0 };
-		cssWidth = mainAreaRect.right - mainAreaRect.left;
-		cssHeight = Math.max(minimumCanvasHeightCssPixels, mainAreaRect.bottom - mainAreaRect.top, window.innerHeight * minimumCanvasHeightFractionOfBrowserWindowHeight - (false ? 0 : buttonAreaRect.height));
-	}
 
 	if (canvasWindowedScaleMode == 3/*NONE*/) {
 		// In fixed display mode, render to a statically determined WebGL render target size.
