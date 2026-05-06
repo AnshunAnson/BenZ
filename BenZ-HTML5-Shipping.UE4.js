@@ -853,13 +853,8 @@ function updateLoadingScreen(taskId, progress, taskText) {
 function hideLoadingScreen() {
 	var loadingScreen = document.getElementById('loading-screen');
 	if (loadingScreen) {
-		// Ensure progress shows 100% before hiding
-		updateLoadingScreen(TASK_MAIN, 100, 'Launching engine...');
-		
-		setTimeout(function() {
-			// 直接移除加载屏幕元素，完全避免阻挡鼠标事件
-			loadingScreen.remove();
-		}, 500);
+		// 立即移除加载屏幕，不延迟，确保Canvas能立即接收鼠标事件
+		loadingScreen.remove();
 	}
 }
 
