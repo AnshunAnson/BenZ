@@ -40,6 +40,7 @@ html, body {
 #loading-screen.hidden {
 	opacity: 0;
 	visibility: hidden;
+	pointer-events: none;
 }
 
 .loading-content {
@@ -199,6 +200,7 @@ html, body {
 	display: block !important;
 	outline: none;
 	background: #000;
+	z-index: 1;
 }
 
 .emscripten {
