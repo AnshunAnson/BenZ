@@ -349,17 +349,30 @@ function resizeCanvas(aboutToEnterFullscreen) {
 		return;
 	}
 
-	// Compute the unconstrained size for fullscreen canvas - always use full window size
+	// Set fixed resolution for better performance - 1280x720 is a good balance
+	var targetWidth = 1280;
+	var targetHeight = 720;
+	
+	// Calculate CSS size to fit window while maintaining aspect ratio
 	var cssWidth = window.innerWidth;
 	var cssHeight = window.innerHeight;
+	
+	var windowRatio = cssWidth / cssHeight;
+	var targetRatio = targetWidth / targetHeight;
+	
+	if (windowRatio > targetRatio) {
+		// Window is wider, fit height
+		cssHeight = window.innerHeight;
+		cssWidth = cssHeight * targetRatio;
+	} else {
+		// Window is taller, fit width
+		cssWidth = window.innerWidth;
+		cssHeight = cssWidth / targetRatio;
+	}
 
-	// Always use full window size for render target to control UE camera viewport directly
-	var newRenderTargetWidth = canvasWindowedUseHighDpi ? (cssWidth * window.devicePixelRatio) : cssWidth;
-	var newRenderTargetHeight = canvasWindowedUseHighDpi ? (cssHeight * window.devicePixelRatio) : cssHeight;
-
-	// WebGL render target sizes are always full integer pixels in size, so rounding is critical for CSS size computations below.
-	newRenderTargetWidth = Math.round(newRenderTargetWidth);
-	newRenderTargetHeight = Math.round(newRenderTargetHeight);
+	// Use fixed render target resolution for performance
+	var newRenderTargetWidth = targetWidth;
+	var newRenderTargetHeight = targetHeight;
 
 	// Resize the actual Canvas element. Since this can either be a regular Canvas or an OffscreenCanvas, use an Emscripten API to
 	// do the resizing, since it needs to be multithreading aware if an OffscreenCanvas is being used. In the case of an OffscreenCanvas,
@@ -367,7 +380,7 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	_emscripten_set_canvas_element_size(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
 //	emscripten_set_canvas_element_size_js(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
 
-	// Set canvas to full window size for proper display
+	// Set canvas CSS size to fit window
 	Module['canvas'].style.width = cssWidth + 'px';
 	Module['canvas'].style.height = cssHeight + 'px';
 	var mainArea = document.getElementById('mainarea');
@@ -1146,16 +1159,30 @@ Module.postRun = [postRunEmscripten];
 
 $(document).ready(function() {
 
-	// Immediately set canvas to full window size to avoid WebGL errors with small initial size
+	// Immediately set canvas to fixed resolution for better performance
 	if (Module['canvas']) {
+		var targetWidth = 1280;
+		var targetHeight = 720;
+		
+		// Calculate CSS size to fit window while maintaining aspect ratio
 		var cssWidth = window.innerWidth;
 		var cssHeight = window.innerHeight;
-		var newRenderTargetWidth = canvasWindowedUseHighDpi ? (cssWidth * window.devicePixelRatio) : cssWidth;
-		var newRenderTargetHeight = canvasWindowedUseHighDpi ? (cssHeight * window.devicePixelRatio) : cssHeight;
-		newRenderTargetWidth = Math.round(newRenderTargetWidth);
-		newRenderTargetHeight = Math.round(newRenderTargetHeight);
-		Module['canvas'].width = newRenderTargetWidth;
-		Module['canvas'].height = newRenderTargetHeight;
+		
+		var windowRatio = cssWidth / cssHeight;
+		var targetRatio = targetWidth / targetHeight;
+		
+		if (windowRatio > targetRatio) {
+			// Window is wider, fit height
+			cssHeight = window.innerHeight;
+			cssWidth = cssHeight * targetRatio;
+		} else {
+			// Window is taller, fit width
+			cssWidth = window.innerWidth;
+			cssHeight = cssWidth / targetRatio;
+		}
+		
+		Module['canvas'].width = targetWidth;
+		Module['canvas'].height = targetHeight;
 		Module['canvas'].style.width = cssWidth + 'px';
 		Module['canvas'].style.height = cssHeight + 'px';
 	}
