@@ -317,7 +317,7 @@ var canvasWindowedScaleMode = 2 /*ASPECT*/;
 // High DPI setting configures whether to match the canvas size 1:1 with
 // the physical pixels on the screen.
 // For background, see https://www.khronos.org/webgl/wiki/HandlingHighDPI
-var canvasWindowedUseHighDpi = true;
+var canvasWindowedUseHighDpi = false;
 
 // Stores the initial size of the canvas in physical pixel units.
 // If canvasWindowedScaleMode == 3 (FIXED), this size defines the fixed resolution
@@ -1145,6 +1145,20 @@ Module.postRun = [postRunEmscripten];
 // MAIN
 
 $(document).ready(function() {
+
+	// Immediately set canvas to full window size to avoid WebGL errors with small initial size
+	if (Module['canvas']) {
+		var cssWidth = window.innerWidth;
+		var cssHeight = window.innerHeight;
+		var newRenderTargetWidth = canvasWindowedUseHighDpi ? (cssWidth * window.devicePixelRatio) : cssWidth;
+		var newRenderTargetHeight = canvasWindowedUseHighDpi ? (cssHeight * window.devicePixelRatio) : cssHeight;
+		newRenderTargetWidth = Math.round(newRenderTargetWidth);
+		newRenderTargetHeight = Math.round(newRenderTargetHeight);
+		Module['canvas'].width = newRenderTargetWidth;
+		Module['canvas'].height = newRenderTargetHeight;
+		Module['canvas'].style.width = cssWidth + 'px';
+		Module['canvas'].style.height = cssHeight + 'px';
+	}
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Deduce which version to load up.
