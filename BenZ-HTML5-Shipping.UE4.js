@@ -317,7 +317,7 @@ var canvasWindowedScaleMode = 1 /*STRETCH*/;
 // High DPI setting configures whether to match the canvas size 1:1 with
 // the physical pixels on the screen.
 // For background, see https://www.khronos.org/webgl/wiki/HandlingHighDPI
-var canvasWindowedUseHighDpi = false;
+var canvasWindowedUseHighDpi = true;
 
 // Stores the initial size of the canvas in physical pixel units.
 // If canvasWindowedScaleMode == 3 (FIXED), this size defines the fixed resolution
@@ -373,12 +373,19 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	// For STRETCH mode (1), cssWidth and cssHeight already use full window size
 
 	// Compute render target size - this controls UE camera viewport
-	var newRenderTargetWidth = canvasWindowedUseHighDpi ? (cssWidth * window.devicePixelRatio) : cssWidth;
-	var newRenderTargetHeight = canvasWindowedUseHighDpi ? (cssHeight * window.devicePixelRatio) : cssHeight;
+	// Fixed DPR=1 for consistent rendering across browsers
+	var effectiveDPR = canvasWindowedUseHighDpi ? Math.min(window.devicePixelRatio || 1, 2) : 1;
+	var newRenderTargetWidth = Math.max(1, Math.round(cssWidth * effectiveDPR));
+	var newRenderTargetHeight = Math.max(1, Math.round(cssHeight * effectiveDPR));
 
-	// Round to avoid floating point issues
-	newRenderTargetWidth = Math.round(newRenderTargetWidth);
-	newRenderTargetHeight = Math.round(newRenderTargetHeight);
+	// Cap to max resolution for performance
+	var MAX_RENDER_WIDTH = 2560;
+	var MAX_RENDER_HEIGHT = 1440;
+	if (newRenderTargetWidth > MAX_RENDER_WIDTH || newRenderTargetHeight > MAX_RENDER_HEIGHT) {
+		var scale = Math.min(MAX_RENDER_WIDTH / newRenderTargetWidth, MAX_RENDER_HEIGHT / newRenderTargetHeight);
+		newRenderTargetWidth = Math.round(newRenderTargetWidth * scale);
+		newRenderTargetHeight = Math.round(newRenderTargetHeight * scale);
+	}
 
 	// Resize the actual Canvas element. Since this can either be a regular Canvas or an OffscreenCanvas, use an Emscripten API to
 	// do the resizing, since it needs to be multithreading aware if an OffscreenCanvas is being used. In the case of an OffscreenCanvas,
