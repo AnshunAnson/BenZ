@@ -350,8 +350,8 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	}
 
 	// Compute the size based on the scale mode
-	var cssWidth = window.innerWidth;
-	var cssHeight = window.innerHeight;
+	var cssWidth = Math.max(1, window.innerWidth);
+	var cssHeight = Math.max(1, window.innerHeight);
 
 	if (canvasWindowedScaleMode === 3 /*FIXED*/) {
 		// Fixed resolution mode - always use the fixed resolution
@@ -1137,11 +1137,9 @@ function postRunEmscripten() {
 //	canvasAspectRatioHeight = UE_JSlib.UE_GSystemResolution_ResY();
 
 	// Configure the size of the canvas and display it.
-	// 延迟确保window尺寸已更新
-	setTimeout(function() {
-		resizeCanvas();
-		Module['canvas'].style.display = 'block';
-	}, 100);
+	// 立即设置Canvas尺寸，确保与浏览器窗口匹配
+	Module['canvas'].style.display = 'block';
+	resizeCanvas();
 
 	// Whenever the browser window size changes, relayout the canvas size on the page.
 	window.addEventListener('resize', resizeCanvas, false);
