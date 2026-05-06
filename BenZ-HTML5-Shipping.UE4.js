@@ -312,12 +312,12 @@ function detectWebGL() {
 // Canvas scaling mode should be set to one of: 1=STRETCH, 2=ASPECT, or 3=FIXED.
 // This dictates how the canvas size changes when the browser window is resized
 // by dragging from the corner.
-var canvasWindowedScaleMode = 2 /*ASPECT*/;
+var canvasWindowedScaleMode = 1 /*STRETCH*/;
 
 // High DPI setting configures whether to match the canvas size 1:1 with
 // the physical pixels on the screen.
 // For background, see https://www.khronos.org/webgl/wiki/HandlingHighDPI
-var canvasWindowedUseHighDpi = false;
+var canvasWindowedUseHighDpi = true;
 
 // Stores the initial size of the canvas in physical pixel units.
 // If canvasWindowedScaleMode == 3 (FIXED), this size defines the fixed resolution
