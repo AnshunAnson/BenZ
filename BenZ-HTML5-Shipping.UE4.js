@@ -349,30 +349,36 @@ function resizeCanvas(aboutToEnterFullscreen) {
 		return;
 	}
 
-	// Set fixed resolution for better performance - 1280x720 is a good balance
-	var targetWidth = 1280;
-	var targetHeight = 720;
-	
-	// Calculate CSS size to fit window while maintaining aspect ratio
+	// Compute the size based on the scale mode
 	var cssWidth = window.innerWidth;
 	var cssHeight = window.innerHeight;
-	
-	var windowRatio = cssWidth / cssHeight;
-	var targetRatio = targetWidth / targetHeight;
-	
-	if (windowRatio > targetRatio) {
-		// Window is wider, fit height
-		cssHeight = window.innerHeight;
-		cssWidth = cssHeight * targetRatio;
-	} else {
-		// Window is taller, fit width
-		cssWidth = window.innerWidth;
-		cssHeight = cssWidth / targetRatio;
-	}
 
-	// Use fixed render target resolution for performance
-	var newRenderTargetWidth = targetWidth;
-	var newRenderTargetHeight = targetHeight;
+	if (canvasWindowedScaleMode === 3 /*FIXED*/) {
+		// Fixed resolution mode - always use the fixed resolution
+		cssWidth = canvasAspectRatioWidth;
+		cssHeight = canvasAspectRatioHeight;
+	} else if (canvasWindowedScaleMode === 2 /*ASPECT*/) {
+		// Aspect ratio mode - compute size that maintains aspect ratio
+		var aspectRatio = canvasAspectRatioWidth / canvasAspectRatioHeight;
+		var windowRatio = cssWidth / cssHeight;
+
+		if (windowRatio > aspectRatio) {
+			// Window is wider than aspect ratio - fit height, add side margins
+			cssWidth = cssHeight * aspectRatio;
+		} else {
+			// Window is taller than aspect ratio - fit width, add top/bottom margins
+			cssHeight = cssWidth / aspectRatio;
+		}
+	}
+	// For STRETCH mode (1), cssWidth and cssHeight already use full window size
+
+	// Compute render target size - this controls UE camera viewport
+	var newRenderTargetWidth = canvasWindowedUseHighDpi ? (cssWidth * window.devicePixelRatio) : cssWidth;
+	var newRenderTargetHeight = canvasWindowedUseHighDpi ? (cssHeight * window.devicePixelRatio) : cssHeight;
+
+	// Round to avoid floating point issues
+	newRenderTargetWidth = Math.round(newRenderTargetWidth);
+	newRenderTargetHeight = Math.round(newRenderTargetHeight);
 
 	// Resize the actual Canvas element. Since this can either be a regular Canvas or an OffscreenCanvas, use an Emscripten API to
 	// do the resizing, since it needs to be multithreading aware if an OffscreenCanvas is being used. In the case of an OffscreenCanvas,
