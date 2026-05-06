@@ -370,6 +370,7 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	// Set canvas to full window size for proper display
 	Module['canvas'].style.width = cssWidth + 'px';
 	Module['canvas'].style.height = cssHeight + 'px';
+	var mainArea = document.getElementById('mainarea');
 	if (mainArea) {
 		mainArea.style.height = cssHeight + 'px';
 	}
