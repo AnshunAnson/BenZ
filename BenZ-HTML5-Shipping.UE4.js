@@ -1147,6 +1147,32 @@ function postRunEmscripten() {
 	window.addEventListener('resize', resizeCanvas, false);
 	window.addEventListener('orientationchange', resizeCanvas, false);
 
+	// Clear all cache and reload function
+	window.clearAllCacheAndReload = function() {
+		// Clear IndexedDB
+		try { deleteIndexedDBStorage(); } catch(e) {}
+		
+		// Clear Service Worker caches
+		if ('serviceWorker' in navigator) {
+			caches.keys().then(function(cacheNames) {
+				cacheNames.forEach(function(cacheName) {
+					caches.delete(cacheName);
+				});
+			});
+		}
+		
+		// Force reload (bypass cache)
+		setTimeout(function() { location.reload(true); }, 300);
+	};
+	
+	// Keyboard shortcut Ctrl+Shift+Delete
+	window.addEventListener('keydown', function(e) {
+		if (e.ctrlKey && e.shiftKey && e.key === 'Delete') {
+			e.preventDefault();
+			window.clearAllCacheAndReload();
+		}
+	});
+
 	// Hide loading screen after a short delay to ensure canvas is ready
 	setTimeout(function() {
 		hideLoadingScreen();
