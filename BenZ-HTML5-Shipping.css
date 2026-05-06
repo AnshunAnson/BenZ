@@ -194,14 +194,9 @@ html, body {
 
 /* Canvas styles */
 #canvas {
-	position: fixed;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
 	display: none;
 	outline: none;
 	background: #000;
-	z-index: 1;
 	pointer-events: auto;
 }
 
