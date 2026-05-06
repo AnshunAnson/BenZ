@@ -857,7 +857,8 @@ function hideLoadingScreen() {
 		updateLoadingScreen(TASK_MAIN, 100, 'Launching engine...');
 		
 		setTimeout(function() {
-			loadingScreen.classList.add('hidden');
+			// 直接移除加载屏幕元素，完全避免阻挡鼠标事件
+			loadingScreen.remove();
 		}, 500);
 	}
 }
