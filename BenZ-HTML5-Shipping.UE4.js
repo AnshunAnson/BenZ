@@ -373,19 +373,9 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	// For STRETCH mode (1), cssWidth and cssHeight already use full window size
 
 	// Compute render target size - this controls UE camera viewport
-	// Fixed DPR=1 for consistent rendering across browsers
-	var effectiveDPR = canvasWindowedUseHighDpi ? Math.min(window.devicePixelRatio || 1, 2) : 1;
-	var newRenderTargetWidth = Math.max(1, Math.round(cssWidth * effectiveDPR));
-	var newRenderTargetHeight = Math.max(1, Math.round(cssHeight * effectiveDPR));
-
-	// Cap to max resolution for performance
-	var MAX_RENDER_WIDTH = 2560;
-	var MAX_RENDER_HEIGHT = 1440;
-	if (newRenderTargetWidth > MAX_RENDER_WIDTH || newRenderTargetHeight > MAX_RENDER_HEIGHT) {
-		var scale = Math.min(MAX_RENDER_WIDTH / newRenderTargetWidth, MAX_RENDER_HEIGHT / newRenderTargetHeight);
-		newRenderTargetWidth = Math.round(newRenderTargetWidth * scale);
-		newRenderTargetHeight = Math.round(newRenderTargetHeight * scale);
-	}
+	// Dynamic resolution: always match browser window size
+	var newRenderTargetWidth = Math.max(1, Math.round(cssWidth * (window.devicePixelRatio || 1)));
+	var newRenderTargetHeight = Math.max(1, Math.round(cssHeight * (window.devicePixelRatio || 1)));
 
 	// Resize the actual Canvas element. Since this can either be a regular Canvas or an OffscreenCanvas, use an Emscripten API to
 	// do the resizing, since it needs to be multithreading aware if an OffscreenCanvas is being used. In the case of an OffscreenCanvas,
