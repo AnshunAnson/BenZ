@@ -353,36 +353,13 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	var cssWidth = window.innerWidth;
 	var cssHeight = window.innerHeight;
 
-	if (canvasWindowedScaleMode == 3/*NONE*/) {
-		// In fixed display mode, render to a statically determined WebGL render target size.
-		var newRenderTargetWidth = canvasAspectRatioWidth;
-		var newRenderTargetHeight = canvasAspectRatioHeight;
-	} else {
-		// Convert unconstrained render target size from CSS to physical pixel units.
-		var newRenderTargetWidth = canvasWindowedUseHighDpi ? (cssWidth * window.devicePixelRatio) : cssWidth;
-		var newRenderTargetHeight = canvasWindowedUseHighDpi ? (cssHeight * window.devicePixelRatio) : cssHeight;
+	// Always use full window size for render target to control UE camera viewport directly
+	var newRenderTargetWidth = canvasWindowedUseHighDpi ? (cssWidth * window.devicePixelRatio) : cssWidth;
+	var newRenderTargetHeight = canvasWindowedUseHighDpi ? (cssHeight * window.devicePixelRatio) : cssHeight;
 
-		// Apply aspect ratio constraints, if desired.
-		if (canvasWindowedScaleMode == 2/*ASPECT*/) {
-			if (cssWidth * canvasAspectRatioHeight > canvasAspectRatioWidth * cssHeight) {
-				newRenderTargetWidth = newRenderTargetHeight * canvasAspectRatioWidth / canvasAspectRatioHeight;
-			} else {
-				newRenderTargetHeight = newRenderTargetWidth * canvasAspectRatioHeight / canvasAspectRatioWidth;
-			}
-		}
-
-		// WebGL render target sizes are always full integer pixels in size, so rounding is critical for CSS size computations below.
-		newRenderTargetWidth = Math.round(newRenderTargetWidth);
-		newRenderTargetHeight = Math.round(newRenderTargetHeight);
-	}
-
-	// Very subtle but important behavior is that the size of a DOM element on a web page in CSS pixel units can be a fraction, e.g. on
-	// high DPI scaling displays (CSS pixel units are "virtual" pixels). If the CSS size and physical pixel size of the WebGL canvas do
-	// not correspond to each other 1:1 after window.devicePixelRatio scaling has been applied, the result can look blurry. Therefore always
-	// first compute the WebGL render target size first in physical pixels, and convert that back to CSS pixels so that the CSS pixel size
-	// will perfectly align up and the result look clear without scaling applied.
-	var renderCssWidth = canvasWindowedUseHighDpi ? (newRenderTargetWidth / window.devicePixelRatio) : newRenderTargetWidth;
-	var renderCssHeight = canvasWindowedUseHighDpi ? (newRenderTargetHeight / window.devicePixelRatio) : newRenderTargetHeight;
+	// WebGL render target sizes are always full integer pixels in size, so rounding is critical for CSS size computations below.
+	newRenderTargetWidth = Math.round(newRenderTargetWidth);
+	newRenderTargetHeight = Math.round(newRenderTargetHeight);
 
 	// Resize the actual Canvas element. Since this can either be a regular Canvas or an OffscreenCanvas, use an Emscripten API to
 	// do the resizing, since it needs to be multithreading aware if an OffscreenCanvas is being used. In the case of an OffscreenCanvas,
