@@ -381,8 +381,8 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	// not correspond to each other 1:1 after window.devicePixelRatio scaling has been applied, the result can look blurry. Therefore always
 	// first compute the WebGL render target size first in physical pixels, and convert that back to CSS pixels so that the CSS pixel size
 	// will perfectly align up and the result look clear without scaling applied.
-	cssWidth = canvasWindowedUseHighDpi ? (newRenderTargetWidth / window.devicePixelRatio) : newRenderTargetWidth;
-	cssHeight = canvasWindowedUseHighDpi ? (newRenderTargetHeight / window.devicePixelRatio) : newRenderTargetHeight;
+	var renderCssWidth = canvasWindowedUseHighDpi ? (newRenderTargetWidth / window.devicePixelRatio) : newRenderTargetWidth;
+	var renderCssHeight = canvasWindowedUseHighDpi ? (newRenderTargetHeight / window.devicePixelRatio) : newRenderTargetHeight;
 
 	// Resize the actual Canvas element. Since this can either be a regular Canvas or an OffscreenCanvas, use an Emscripten API to
 	// do the resizing, since it needs to be multithreading aware if an OffscreenCanvas is being used. In the case of an OffscreenCanvas,
@@ -390,7 +390,7 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	_emscripten_set_canvas_element_size(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
 //	emscripten_set_canvas_element_size_js(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
 
-	// Let UE4 control canvas size
+	// Set canvas to full window size for proper display
 	Module['canvas'].style.width = cssWidth + 'px';
 	Module['canvas'].style.height = cssHeight + 'px';
 	if (mainArea) {
