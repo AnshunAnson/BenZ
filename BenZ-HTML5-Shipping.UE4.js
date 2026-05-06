@@ -312,7 +312,7 @@ function detectWebGL() {
 // Canvas scaling mode should be set to one of: 1=STRETCH, 2=ASPECT, or 3=FIXED.
 // This dictates how the canvas size changes when the browser window is resized
 // by dragging from the corner.
-var canvasWindowedScaleMode = 1 /*STRETCH*/;
+var canvasWindowedScaleMode = 2 /*ASPECT*/;
 
 // High DPI setting configures whether to match the canvas size 1:1 with
 // the physical pixels on the screen.
@@ -390,9 +390,9 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	_emscripten_set_canvas_element_size(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
 //	emscripten_set_canvas_element_size_js(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
 
-	// Always set canvas to fullscreen
-	Module['canvas'].style.width = '100vw';
-	Module['canvas'].style.height = '100vh';
+	// Let UE4 control canvas size
+	Module['canvas'].style.width = cssWidth + 'px';
+	Module['canvas'].style.height = cssHeight + 'px';
 	if (mainArea) {
 		mainArea.style.height = cssHeight + 'px';
 	}
@@ -1146,10 +1146,6 @@ function postRunEmscripten() {
 	// Configure the size of the canvas and display it.
 	resizeCanvas();
 	Module['canvas'].style.display = 'block';
-
-	// Ensure canvas stays fullscreen
-	Module['canvas'].style.width = '100vw';
-	Module['canvas'].style.height = '100vh';
 
 	// Whenever the browser window size changes, relayout the canvas size on the page.
 	window.addEventListener('resize', resizeCanvas, false);
