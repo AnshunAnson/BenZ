@@ -1155,34 +1155,6 @@ Module.postRun = [postRunEmscripten];
 
 $(document).ready(function() {
 
-	// Immediately set canvas to fixed resolution for better performance
-	if (Module['canvas']) {
-		var targetWidth = 1280;
-		var targetHeight = 720;
-		
-		// Calculate CSS size to fit window while maintaining aspect ratio
-		var cssWidth = window.innerWidth;
-		var cssHeight = window.innerHeight;
-		
-		var windowRatio = cssWidth / cssHeight;
-		var targetRatio = targetWidth / targetHeight;
-		
-		if (windowRatio > targetRatio) {
-			// Window is wider, fit height
-			cssHeight = window.innerHeight;
-			cssWidth = cssHeight * targetRatio;
-		} else {
-			// Window is taller, fit width
-			cssWidth = window.innerWidth;
-			cssHeight = cssWidth / targetRatio;
-		}
-		
-		Module['canvas'].width = targetWidth;
-		Module['canvas'].height = targetHeight;
-		Module['canvas'].style.width = cssWidth + 'px';
-		Module['canvas'].style.height = cssHeight + 'px';
-	}
-
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	// Deduce which version to load up.
 	var supportsWasm = (typeof WebAssembly === 'object' && typeof WebAssembly.Memory === 'function');
