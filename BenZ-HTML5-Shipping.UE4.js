@@ -245,6 +245,15 @@ Module['preinitializedWebGLContext'] = null;
 
 Module['canvas'] = document.getElementById('canvas');
 
+// Set initial canvas size before WebGL context is created
+Module['canvas'].style.position = 'fixed';
+Module['canvas'].style.top = '0';
+Module['canvas'].style.left = '0';
+Module['canvas'].width = window.innerWidth;
+Module['canvas'].height = window.innerHeight;
+Module['canvas'].style.width = window.innerWidth + 'px';
+Module['canvas'].style.height = window.innerHeight + 'px';
+
 function getGpuInfo() {
 	var gl = Module['preinitializedWebGLContext'];
 	if (!gl) return '(no GL: ' + Module['webGLErrorReason'] + ')';
