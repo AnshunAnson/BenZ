@@ -1137,7 +1137,9 @@ function postRunEmscripten() {
 //	canvasAspectRatioHeight = UE_JSlib.UE_GSystemResolution_ResY();
 
 	// Configure the size of the canvas and display it.
-	// 立即设置Canvas尺寸，确保与浏览器窗口匹配
+	// 先设置Canvas CSS尺寸，再调用resizeCanvas设置渲染尺寸
+	Module['canvas'].style.width = window.innerWidth + 'px';
+	Module['canvas'].style.height = window.innerHeight + 'px';
 	Module['canvas'].style.display = 'block';
 	resizeCanvas();
 

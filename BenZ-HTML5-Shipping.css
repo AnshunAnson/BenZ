@@ -197,7 +197,9 @@ html, body {
 	position: fixed;
 	top: 0;
 	left: 0;
-	display: block;
+	width: 100vw;
+	height: 100vh;
+	display: none;
 	outline: none;
 	background: #000;
 	z-index: 1;
