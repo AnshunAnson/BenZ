@@ -1,4 +1,4 @@
-﻿// javascript code used with Epic Games HTML5 projects
+// javascript code used with Epic Games HTML5 projects
 //
 // much of this is for UE4 development purposes.
 //
@@ -349,15 +349,20 @@ function resizeCanvas(aboutToEnterFullscreen) {
 		return;
 	}
 
-	var mainArea = document.getElementById('mainarea');
-	var mainAreaRect = mainArea.getBoundingClientRect();
+	// Compute the unconstrained size for fullscreen canvas
+	var cssWidth = window.innerWidth;
+	var cssHeight = window.innerHeight;
 
+	var mainArea = document.getElementById('mainarea');
 	var buttonArea = document.getElementById('buttonarea');
-	var buttonAreaRect = buttonArea.getBoundingClientRect();
 	
-	// Compute the unconstrained size for the div that encloses the canvas, in CSS pixel units.
-	var cssWidth = mainAreaRect.right - mainAreaRect.left;
-	var cssHeight = Math.max(minimumCanvasHeightCssPixels, mainAreaRect.bottom - mainAreaRect.top, window.innerHeight * minimumCanvasHeightFractionOfBrowserWindowHeight - (false ? 0 : buttonAreaRect.height));
+	// Fallback to original behavior if mainarea exists
+	if (mainArea) {
+		var mainAreaRect = mainArea.getBoundingClientRect();
+		var buttonAreaRect = buttonArea ? buttonArea.getBoundingClientRect() : { height: 0 };
+		cssWidth = mainAreaRect.right - mainAreaRect.left;
+		cssHeight = Math.max(minimumCanvasHeightCssPixels, mainAreaRect.bottom - mainAreaRect.top, window.innerHeight * minimumCanvasHeightFractionOfBrowserWindowHeight - (false ? 0 : buttonAreaRect.height));
+	}
 
 	if (canvasWindowedScaleMode == 3/*NONE*/) {
 		// In fixed display mode, render to a statically determined WebGL render target size.
@@ -396,8 +401,12 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	_emscripten_set_canvas_element_size(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
 //	emscripten_set_canvas_element_size_js(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
 
-	Module['canvas'].style.width = cssWidth + 'px';
-	Module['canvas'].style.height = mainArea.style.height = cssHeight + 'px';
+	// Always set canvas to fullscreen
+	Module['canvas'].style.width = '100vw';
+	Module['canvas'].style.height = '100vh';
+	if (mainArea) {
+		mainArea.style.height = cssHeight + 'px';
+	}
 
 	// Tell the engine that the web page has changed the size of the WebGL render target on the canvas (Module['canvas'].width/height).
 	// This will update the GL viewport and propagate the change throughout the engine.
@@ -820,6 +829,59 @@ var TASK_SHADERS = 2;
 var TASK_MAIN = 3;
 var loadTasks = [ 'Downloading', 'Compiling WebAssembly', 'Building shaders', 'Launching engine'];
 
+// Global variable to track overall progress
+var overallProgress = 0;
+var totalTasks = 4; // Download, Compile, Shaders, Launch
+var currentTaskProgress = [0, 0, 0, 0];
+
+function updateLoadingScreen(taskId, progress, taskText) {
+	var progressFill = document.getElementById('progress-fill');
+	var progressText = document.getElementById('progress-text');
+	var loadingTask = document.getElementById('loading-task');
+	
+	if (loadingTask && taskText) {
+		loadingTask.textContent = taskText;
+	}
+	
+	// Calculate overall progress
+	var taskWeight = 100 / totalTasks;
+	if (taskId !== undefined && taskId >= 0) {
+		currentTaskProgress[taskId] = progress || 0;
+		
+		// Completed previous tasks get full weight, current task gets partial, future tasks 0
+		overallProgress = 0;
+		for (var i = 0; i < totalTasks; i++) {
+			if (i < taskId) {
+				overallProgress += taskWeight;
+			} else if (i === taskId) {
+				overallProgress += taskWeight * (currentTaskProgress[i] / 100);
+			}
+		}
+	}
+	
+	// Ensure progress doesn't exceed 100%
+	overallProgress = Math.min(overallProgress, 100);
+	
+	if (progressFill) {
+		progressFill.style.width = overallProgress + '%';
+	}
+	if (progressText) {
+		progressText.textContent = Math.round(overallProgress) + '%';
+	}
+}
+
+function hideLoadingScreen() {
+	var loadingScreen = document.getElementById('loading-screen');
+	if (loadingScreen) {
+		// Ensure progress shows 100% before hiding
+		updateLoadingScreen(TASK_MAIN, 100, 'Launching engine...');
+		
+		setTimeout(function() {
+			loadingScreen.classList.add('hidden');
+		}, 500);
+	}
+}
+
 function taskProgress(taskId, progress) {
 	var c = document.getElementById('compilingmessage');
 	if (c) c.style.display = 'block';
@@ -835,12 +897,17 @@ function taskProgress(taskId, progress) {
 	}
 	if (!l.startTime) l.startTime = performance.now();
 	var text = loadTasks[taskId];
+	var percentage = 0;
 	if (progress && progress.total) {
 		text += ': ' + (progress.currentShow || progress.current) + '/' + (progress.totalShow || progress.total) + ' (' + (progress.current * 100 / progress.total).toFixed(0) + '%)';
+		percentage = (progress.current * 100 / progress.total);
 	} else {
 		text += '...';
 	}
 	l.innerHTML = text;
+	
+	// Update custom loading screen
+	updateLoadingScreen(taskId, percentage, loadTasks[taskId] + '...');
 }
 
 function taskFinished(taskId, error) {
@@ -851,6 +918,8 @@ function taskFinished(taskId, error) {
 		if (!error) {
 			l.innerHTML = loadTasks[taskId] + ' (' + (totalTime/1000).toFixed(2) + 's)';
 			icon.className = 'glyphicon glyphicon-ok';
+			// Mark task as 100% complete
+			currentTaskProgress[taskId] = 100;
 		}
 		else {
 			l.innerHTML = loadTasks[taskId] + ': FAILED! ' + error;
@@ -858,6 +927,11 @@ function taskFinished(taskId, error) {
 
 			showErrorDialog(loadTasks[taskId] + ' failed: <br> ' + error);
 		}
+	}
+	
+	// Hide loading screen when main task finishes
+	if (taskId === TASK_MAIN && !error) {
+		hideLoadingScreen();
 	}
 }
 
@@ -1084,9 +1158,18 @@ function postRunEmscripten() {
 	resizeCanvas();
 	Module['canvas'].style.display = 'block';
 
+	// Ensure canvas stays fullscreen
+	Module['canvas'].style.width = '100vw';
+	Module['canvas'].style.height = '100vh';
+
 	// Whenever the browser window size changes, relayout the canvas size on the page.
 	window.addEventListener('resize', resizeCanvas, false);
 	window.addEventListener('orientationchange', resizeCanvas, false);
+
+	// Hide loading screen after a short delay to ensure canvas is ready
+	setTimeout(function() {
+		hideLoadingScreen();
+	}, 1000);
 
 	// The following is needed if game is within an iframe - main window already has focus...
 	window.focus();

@@ -32,21 +32,37 @@
 </head>
 <body>
 
-<div class="wrapper" id="mainarea">
-	<div class="alert alert-warning centered-axis-xy" style="min-height: 20px; display:none;" role="alert" id="compilingmessage">
-		<div id='loadTasks'> </div>
+<!-- Loading Screen -->
+<div id="loading-screen">
+	<div class="loading-content">
+		<div class="loading-spinner">
+			<div class="spinner-ring spinner-ring-1"></div>
+			<div class="spinner-ring spinner-ring-2"></div>
+			<div class="spinner-ring spinner-ring-3"></div>
+		</div>
+		<div class="loading-text">
+			<h1 class="loading-title">BenZ</h1>
+			<p class="loading-task" id="loading-task">Initializing...</p>
+		</div>
+		<div class="progress-container">
+			<div class="progress-bar">
+				<div class="progress-fill" id="progress-fill"></div>
+			</div>
+			<div class="progress-text" id="progress-text">0%</div>
+		</div>
 	</div>
-	<!-- The "tabindex=0" specifier on the canvas is important to allow it to capture keyboard focus when clicking on it with a mouse -->
-	<canvas tabindex=0 id="canvas" class="emscripten" oncontextmenu="event.preventDefault()" style="display:none;">
 </div>
-<div class="buttonarea text-center" id="buttonarea">
-	<!--
-	<button type="button" class="btn btn-primary" id="about" data-toggle="modal" data-target="#aboutModal" title="About">
-		<span class="glyphicon glyphicon-info-sign" aria-hidden="true"></span>
-		<span class="buttontext">&nbsp;About</span>
-	</button>
-	-->
-	
+
+<!-- Original elements (hidden) -->
+<div class="alert alert-warning centered-axis-xy" style="min-height: 20px; display:none;" role="alert" id="compilingmessage">
+	<div id='loadTasks'> </div>
+</div>
+
+<!-- Fullscreen Canvas -->
+<canvas tabindex=0 id="canvas" class="emscripten" oncontextmenu="event.preventDefault()">
+
+<!-- Hidden original UI -->
+<div class="buttonarea text-center" id="buttonarea" style="display:none;">
 	<button type="button" id="pause" class="btn btn-primary" onclick="try { Module['pauseMainLoop'](); $('#resume').show().focus(); $('#pause').hide(); } catch(e) {console.error(e);}" title="Pause" style="display:none">
 		<span class="glyphicon glyphicon-pause" aria-hidden="true"></span>
 		<span class="buttontext">&nbsp;Pause</span> 
@@ -55,39 +71,15 @@
 		<span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 		<span class="buttontext">&nbsp;Resume</span>
 	</button>
-	
-	<!--<button type="button" class="btn btn-primary" onclick="var w = document.getElementById('logwindow'); w.style.display = w.style.display ? '' : 'none';">Toggle Log</button></div>-->
-	
 	<button type="button" class="btn btn-primary" id="clear_indexeddb" onclick="try { deleteIndexedDBStorage(); } catch(e) {console.error(e);}" title="Clear IndexedDB" style="display:none">
 		<span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
 		<span class="buttontext">&nbsp;Clear IndexedDB</span>
 	</button>
-	
-	
 	<button type="button" class="btn btn-primary" id="fullscreen_request" title="Fullscreen" style="display:none">
 		<span class="glyphicon glyphicon-fullscreen" aria-hidden="true"></span>
 		<span class="buttontext">&nbsp;Fullscreen</span>
 	</button>
-	
 </div>
-
-<!--
-<div class="modal fade" id="aboutModal" tabindex="-1" role="dialog">
-	<div class="modal-dialog modal-lg" role="document">
-		<div class="modal-content">
-			<div class="modal-body">
-				<div></div>
-				<div class="text-center">
-					<button type="button" class="btn btn-default" data-dismiss="modal" style="margin-bottom:0">
-						<span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
-						<span class="buttontext">&nbsp;Close</span>
-					</button>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
--->
 
 <div class="texthalf text-normal jumbotron " id="logwindow" style='display:none'></div>
 
