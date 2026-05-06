@@ -372,19 +372,20 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	}
 	// For STRETCH mode (1), cssWidth and cssHeight already use full window size
 
-	// Compute render target size - this controls UE camera viewport
-	// Dynamic resolution: always match browser window size
-	var newRenderTargetWidth = Math.max(1, Math.round(cssWidth * (window.devicePixelRatio || 1)));
-	var newRenderTargetHeight = Math.max(1, Math.round(cssHeight * (window.devicePixelRatio || 1)));
+	// Compute render target size - 1:1 match with CSS pixels
+	// UE camera viewport reads CSS size, so render target must match
+	var newRenderTargetWidth = Math.max(1, cssWidth);
+	var newRenderTargetHeight = Math.max(1, cssHeight);
 
 	// Resize the actual Canvas element. Since this can either be a regular Canvas or an OffscreenCanvas, use an Emscripten API to
 	// do the resizing, since it needs to be multithreading aware if an OffscreenCanvas is being used. In the case of an OffscreenCanvas,
 	// the resizing may happen asynchronously.
 	// Set canvas CSS size to fill the entire browser window
+	Module['canvas'].style.position = 'fixed';
+	Module['canvas'].style.top = '0';
+	Module['canvas'].style.left = '0';
 	Module['canvas'].style.width = cssWidth + 'px';
 	Module['canvas'].style.height = cssHeight + 'px';
-	Module['canvas'].style.left = '0';
-	Module['canvas'].style.top = '0';
 	Module['canvas'].style.transform = 'none';
 	
 	var mainArea = document.getElementById('mainarea');
@@ -1136,7 +1137,10 @@ function postRunEmscripten() {
 //	canvasAspectRatioHeight = UE_JSlib.UE_GSystemResolution_ResY();
 
 	// Configure the size of the canvas and display it.
-	// 先设置Canvas CSS尺寸，再调用resizeCanvas设置渲染尺寸
+	// Set initial CSS positioning before showing canvas
+	Module['canvas'].style.position = 'fixed';
+	Module['canvas'].style.top = '0';
+	Module['canvas'].style.left = '0';
 	Module['canvas'].style.width = window.innerWidth + 'px';
 	Module['canvas'].style.height = window.innerHeight + 'px';
 	Module['canvas'].style.display = 'block';
