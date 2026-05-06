@@ -380,20 +380,22 @@ function resizeCanvas(aboutToEnterFullscreen) {
 	// Resize the actual Canvas element. Since this can either be a regular Canvas or an OffscreenCanvas, use an Emscripten API to
 	// do the resizing, since it needs to be multithreading aware if an OffscreenCanvas is being used. In the case of an OffscreenCanvas,
 	// the resizing may happen asynchronously.
-	_emscripten_set_canvas_element_size(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
-//	emscripten_set_canvas_element_size_js(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
-
-	// Set canvas CSS size to fit window
+	// Set canvas CSS size to fill the entire browser window
 	Module['canvas'].style.width = cssWidth + 'px';
 	Module['canvas'].style.height = cssHeight + 'px';
+	Module['canvas'].style.left = '0';
+	Module['canvas'].style.top = '0';
+	Module['canvas'].style.transform = 'none';
+	
 	var mainArea = document.getElementById('mainarea');
 	if (mainArea) {
 		mainArea.style.height = cssHeight + 'px';
 	}
 
-	// Tell the engine that the web page has changed the size of the WebGL render target on the canvas (Module['canvas'].width/height).
-	// This will update the GL viewport and propagate the change throughout the engine.
-	// If the CSS style size is changed, this function doesn't need to be called.
+	// Resize the actual Canvas element render target size
+	_emscripten_set_canvas_element_size(Module['canvas'].id, newRenderTargetWidth, newRenderTargetHeight);
+
+	// Tell the engine to update GL viewport and propagate the change
 	if (UE_JSlib.UE_CanvasSizeChanged) UE_JSlib.UE_CanvasSizeChanged();
 }
 Module['UE4_resizeCanvas'] = resizeCanvas;
